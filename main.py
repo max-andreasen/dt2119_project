@@ -10,4 +10,5 @@ processor = AutoProcessor.from_pretrained("openai/whisper-large")
 model_whisp = AutoModelForSpeechSeq2Seq.from_pretrained("openai/whisper-large")
 
 
-ds = load_dataset("NbAiLab/NST", split="train", trust_remote_code=True)
+# options include 'no-both' for close + distant, 'no-close' or 'no-distant' 
+ds = load_dataset("NbAiLab/NST", "no-both", split="train")
