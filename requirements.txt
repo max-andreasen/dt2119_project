@@ -1,3 +1,4 @@
 torch
 transformers
 datasets<3.0
+soundfile
