@@ -1,4 +1,7 @@
 torch
+torchaudio
 transformers
 datasets<3.0
 soundfile
+librosa
+accelerate
