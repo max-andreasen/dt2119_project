@@ -11,4 +11,5 @@ model_whisp = AutoModelForSpeechSeq2Seq.from_pretrained("openai/whisper-large")
 
 
 # options include 'no-both' for close + distant, 'no-close' or 'no-distant' 
-ds = load_dataset("NbAiLab/NST", "no-both", split="train")
+ds_train = load_dataset("NbAiLab/NST", "no-both", split="train")
+ds_test = load_dataset("NbAiLab/NST", "no-both", split="test")
