@@ -1,0 +1,8 @@
+Template for a config file when running inference. 
+
+In the future, contains values like: 
+model_path = 
+dataset_split_file =  
+dataset_split = test 
+features = lmfcc
+... 

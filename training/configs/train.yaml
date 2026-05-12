@@ -1,0 +1,14 @@
+Template for a config file when training a model. 
+
+In the future, contains values like: 
+model_type = 
+
+model_type = LoRA:
+  dropout = 0.2
+  hidden_dim = 1024 
+  ...
+
+dataset_split_file =  
+dataset_split = test 
+features = lmfcc
+... 
