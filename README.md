@@ -6,3 +6,15 @@ pip install -r requirements.txt
 python main.py
 ``` 
 Will start downloading the models and data to cache. 
+
+## Repo structure
+
+### Models
+
+### Training
+
+### Testing
+
+### Results / file management
+
+## 
