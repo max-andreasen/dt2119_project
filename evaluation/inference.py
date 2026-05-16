@@ -116,11 +116,14 @@ def run_inference(config):
 
         t0 = time.perf_counter()
         with torch.no_grad():
-            # inference; model predicts tokens based on audio inputs
+            # inference; model predicts tokens based on audio inputs.
+            # max_new_tokens caps runaway hallucinations — without it a single bad sample
+            # can stall an entire batch for many minutes generating repetitive tokens.
             predicted_ids = model.generate(
                 input_features,
                 language=config.language,
                 task=config.task,
+                max_new_tokens=getattr(config, "max_new_tokens", 200),
             )
         inference_time = time.perf_counter() - t0
         per_sample_time = inference_time / len(audio_arrays)
