@@ -39,9 +39,8 @@ def load_model(config):
     # GPU = float16, CPU = float32
     torch_dtype = torch.float16 if device in ("cuda", "mps") else torch.float32
 
-    # loads the model weights
-    model = AutoModelForSpeechSeq2Seq.from_pretrained(config.model_id, dtype=torch_dtype)
-    model.to(device)
+    # device_map="auto" loads directly onto GPU, avoiding the .to(device) CUDA allocator bug with MIG
+    model = AutoModelForSpeechSeq2Seq.from_pretrained(config.model_id, dtype=torch_dtype, device_map="auto")
 
     # if the model is set to lora, load the adapter on top
     if config.model_type == "lora":
