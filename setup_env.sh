@@ -12,7 +12,8 @@ if command -v conda &> /dev/null; then
         conda create -y -p "$ENV_PATH" python=3.11
     fi
 
-    source activate "$ENV_PATH"
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate "$ENV_PATH"
 
     if [ $? -eq 0 ]; then
         echo "Installing dependencies into conda env..."
