@@ -4,9 +4,9 @@ lora_adapter_path: null
 dataset: NbAiLab/NST
 dataset_config: no-both
 text_column: text
-batch_size: 16
+batch_size: 4
 language: "no"
 task: transcribe
-max_samples: null
+max_samples: 100
 output_dir: results/
 run_name: kb_baseline
