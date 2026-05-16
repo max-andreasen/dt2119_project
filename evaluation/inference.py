@@ -148,8 +148,10 @@ def run_inference(config):
     df.to_csv(transcriptions_path, index=False)
     logger.info("Transcriptions saved to %s", transcriptions_path)
 
-    # loads the saved csv file with the results, and calcs the evaluation metrics
-    df_saved = pd.read_csv(transcriptions_path)
+    # loads the saved csv file with the results, and calcs the evaluation metrics.
+    # keep_default_na=False prevents pandas turning empty transcriptions into NaN (float),
+    # which would crash jiwer downstream.
+    df_saved = pd.read_csv(transcriptions_path, keep_default_na=False)
     wer = compute_wer(df_saved["reference"].tolist(), df_saved["hypothesis"].tolist())
     cer = compute_cer(df_saved["reference"].tolist(), df_saved["hypothesis"].tolist())
     rtf = compute_rtf(df_saved["inference_time_s"].tolist(), df_saved["audio_duration_s"].tolist())
