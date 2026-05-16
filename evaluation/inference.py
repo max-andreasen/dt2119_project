@@ -127,11 +127,14 @@ def run_inference(config):
             # inference; model predicts tokens based on audio inputs.
             # max_new_tokens caps runaway hallucinations — without it a single bad sample
             # can stall an entire batch for many minutes generating repetitive tokens.
+            # no_repeat_ngram_size=3 breaks the repetition loops Whisper falls into on
+            # silent or repetitive audio (common in NST) before the cap is even reached.
             predicted_ids = model.generate(
                 input_features,
                 language=config.language,
                 task=config.task,
                 max_new_tokens=getattr(config, "max_new_tokens", 200),
+                no_repeat_ngram_size=3,
             )
         inference_time = time.perf_counter() - t0
         per_sample_time = inference_time / len(audio_arrays)
