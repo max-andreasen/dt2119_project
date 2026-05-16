@@ -40,8 +40,15 @@ def load_model(config):
     torch_dtype = torch.float16 if device in ("cuda", "mps") else torch.float32
 
     if device == "cuda":
-        # device_map="auto" avoids the .to(device) CUDA allocator bug present on MIG instances
-        model = AutoModelForSpeechSeq2Seq.from_pretrained(config.model_id, dtype=torch_dtype, device_map="auto")
+        # device_map="auto" avoids the .to(device) CUDA allocator bug present on MIG instances.
+        # max_memory prevents accelerate from CPU-offloading on MIG (which misreports available VRAM).
+        max_memory = getattr(config, "max_memory_cuda_gb", 18)
+        model = AutoModelForSpeechSeq2Seq.from_pretrained(
+            config.model_id,
+            dtype=torch_dtype,
+            device_map="auto",
+            max_memory={"cuda:0": f"{max_memory}GiB", "cpu": "64GiB"},
+        )
     else:
         model = AutoModelForSpeechSeq2Seq.from_pretrained(config.model_id, dtype=torch_dtype)
         model.to(device)

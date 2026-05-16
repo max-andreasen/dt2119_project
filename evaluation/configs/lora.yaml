@@ -8,5 +8,6 @@ batch_size: 8
 language: "no"
 task: transcribe
 max_samples: null
+max_memory_cuda_gb: 18
 output_dir: results/
 run_name: lora_finetuned

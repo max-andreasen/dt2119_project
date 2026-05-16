@@ -8,5 +8,6 @@ batch_size: 4
 language: "no"
 task: transcribe
 max_samples: 100
+max_memory_cuda_gb: 18
 output_dir: results/
 run_name: kb_baseline
