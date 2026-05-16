@@ -8,6 +8,7 @@ the appropriate metrics (e.g. word error rate).
 import json
 import logging
 import os
+import signal
 import sys
 import time
 import types
@@ -33,6 +34,18 @@ warnings.filterwarnings("ignore", module="transformers.*")
 # layer-by-layer loading would fit. Disable the warmup (it is only a perf optimization).
 import transformers.modeling_utils as _modeling_utils
 _modeling_utils.caching_allocator_warmup = lambda *args, **kwargs: None
+
+
+# safety net so a single pathological batch can't stall the whole run
+class BatchTimeout(Exception):
+    pass
+
+
+def _batch_timeout_handler(signum, frame):
+    raise BatchTimeout()
+
+
+signal.signal(signal.SIGALRM, _batch_timeout_handler)
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -108,6 +121,9 @@ def run_inference(config):
 
     results = []
     n_batches = (len(ds) + config.batch_size - 1) // config.batch_size
+    batch_timeout_s = getattr(config, "batch_timeout_s", 30)
+    n_timed_out_batches = 0
+    n_timed_out_samples = 0
 
     # loops through each batch
     for batch_idx, start in enumerate(tqdm(range(0, len(ds), config.batch_size), total=n_batches, desc=config.run_name)):
@@ -135,22 +151,33 @@ def run_inference(config):
             input_features = input_features.to(device=device, dtype=next(model.parameters()).dtype)
 
             t0 = time.perf_counter()
-            with torch.no_grad():
-                # inference; model predicts tokens based on audio inputs.
-                # max_new_tokens caps runaway hallucinations; no_repeat_ngram_size=3
-                # breaks the repetition loops Whisper falls into on repetitive audio.
-                predicted_ids = model.generate(
-                    input_features,
-                    language=config.language,
-                    task=config.task,
-                    max_new_tokens=getattr(config, "max_new_tokens", 200),
-                    no_repeat_ngram_size=3,
+            signal.alarm(batch_timeout_s)
+            try:
+                with torch.no_grad():
+                    # inference; model predicts tokens based on audio inputs.
+                    # max_new_tokens caps runaway hallucinations; no_repeat_ngram_size=3
+                    # breaks the repetition loops Whisper falls into on repetitive audio.
+                    predicted_ids = model.generate(
+                        input_features,
+                        language=config.language,
+                        task=config.task,
+                        max_new_tokens=getattr(config, "max_new_tokens", 200),
+                        no_repeat_ngram_size=3,
+                    )
+                inference_time = time.perf_counter() - t0
+                active_hyps = processor.batch_decode(predicted_ids, skip_special_tokens=True)
+                for i, hyp in zip(active_idx, active_hyps):
+                    hypotheses[i] = hyp
+            except BatchTimeout:
+                inference_time = time.perf_counter() - t0
+                n_timed_out_batches += 1
+                n_timed_out_samples += len(active_idx)
+                logger.warning(
+                    "batch=%d timed out after %ds — leaving %d samples with empty hypothesis",
+                    batch_idx, batch_timeout_s, len(active_idx),
                 )
-            inference_time = time.perf_counter() - t0
-
-            active_hyps = processor.batch_decode(predicted_ids, skip_special_tokens=True)
-            for i, hyp in zip(active_idx, active_hyps):
-                hypotheses[i] = hyp
+            finally:
+                signal.alarm(0)
 
         per_sample_time = inference_time / max(1, len(active_idx))
 
@@ -189,6 +216,8 @@ def run_inference(config):
         "wer": wer,
         "cer": cer,
         "mean_rtf": rtf,
+        "timed_out_batches": n_timed_out_batches,
+        "timed_out_samples": n_timed_out_samples,
         "config": vars(config),
     }
     summary_path = os.path.join(out_dir, "summary.json")
@@ -196,6 +225,11 @@ def run_inference(config):
         json.dump(summary, f, indent=2)
     logger.info("Summary saved to %s", summary_path)
     logger.info("WER=%.4f CER=%.4f mean_RTF=%.4f", wer, cer, rtf)
+    if n_timed_out_batches:
+        logger.warning(
+            "timed_out_batches=%d timed_out_samples=%d (hypotheses left empty for those samples)",
+            n_timed_out_batches, n_timed_out_samples,
+        )
 
 
 if __name__ == "__main__":
