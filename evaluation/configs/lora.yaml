@@ -1,0 +1,12 @@
+model_type: lora
+model_id: KBLab/kb-whisper-large
+lora_adapter_path: outputs/lora-adapter   # override with HF Hub repo ID if adapter is pushed there
+dataset: NbAiLab/NST
+dataset_config: no-both
+text_column: text
+batch_size: 8
+language: "no"
+task: transcribe
+max_samples: null
+output_dir: results/
+run_name: lora_finetuned

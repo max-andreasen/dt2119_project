@@ -1,8 +1,13 @@
-Template for a config file when running inference. 
-
-In the future, contains values like: 
-model_path = 
-dataset_split_file =  
-dataset_split = test 
-features = lmfcc
-... 
+# Inference config template — copy and fill in per run
+model_type: kb                        # "kb" | "whisper" | "lora"
+model_id: KBLab/kb-whisper-large
+lora_adapter_path: null               # local path or HF Hub repo ID; only used when model_type=lora
+dataset: NbAiLab/NST
+dataset_config: no-both
+text_column: text                     # reference transcription column in the dataset
+batch_size: 8
+language: "no"
+task: transcribe
+max_samples: null                     # set to an int to cap samples (debugging / pilot runs)
+output_dir: results/
+run_name: my_run
