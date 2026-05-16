@@ -12,6 +12,7 @@ import sys
 import time
 import types
 
+import numpy as np
 import pandas as pd
 import torch
 import yaml
@@ -118,29 +119,40 @@ def run_inference(config):
         references = batch[config.text_column]
         audio_durations = [len(arr) / sr for arr, sr in zip(audio_arrays, sampling_rates)]
 
-        # preprocessing of the extracted audio data from the dataset
-        input_features = preprocess_batch(audio_arrays, processor)
-        input_features = input_features.to(device=device, dtype=next(model.parameters()).dtype)
+        # NST contains silent takes (audio with no speech but with a meta-instruction
+        # like "be quiet during this recording" in the reference text). Whisper enters
+        # a runaway hallucination loop on silence and stalls inference for many minutes,
+        # so we detect silent samples and assign them an empty hypothesis directly.
+        silent_threshold = getattr(config, "silent_rms_threshold", 0.001)
+        silent_flags = [float(np.sqrt(np.mean(np.square(arr)))) < silent_threshold for arr in audio_arrays]
+        active_idx = [i for i, s in enumerate(silent_flags) if not s]
 
-        t0 = time.perf_counter()
-        with torch.no_grad():
-            # inference; model predicts tokens based on audio inputs.
-            # max_new_tokens caps runaway hallucinations — without it a single bad sample
-            # can stall an entire batch for many minutes generating repetitive tokens.
-            # no_repeat_ngram_size=3 breaks the repetition loops Whisper falls into on
-            # silent or repetitive audio (common in NST) before the cap is even reached.
-            predicted_ids = model.generate(
-                input_features,
-                language=config.language,
-                task=config.task,
-                max_new_tokens=getattr(config, "max_new_tokens", 200),
-                no_repeat_ngram_size=3,
-            )
-        inference_time = time.perf_counter() - t0
-        per_sample_time = inference_time / len(audio_arrays)
+        hypotheses = [""] * len(audio_arrays)
+        inference_time = 0.0
+        if active_idx:
+            active_arrays = [audio_arrays[i] for i in active_idx]
+            input_features = preprocess_batch(active_arrays, processor)
+            input_features = input_features.to(device=device, dtype=next(model.parameters()).dtype)
 
-        # translates the token outputs from the model into readable text
-        hypotheses = processor.batch_decode(predicted_ids, skip_special_tokens=True)
+            t0 = time.perf_counter()
+            with torch.no_grad():
+                # inference; model predicts tokens based on audio inputs.
+                # max_new_tokens caps runaway hallucinations; no_repeat_ngram_size=3
+                # breaks the repetition loops Whisper falls into on repetitive audio.
+                predicted_ids = model.generate(
+                    input_features,
+                    language=config.language,
+                    task=config.task,
+                    max_new_tokens=getattr(config, "max_new_tokens", 200),
+                    no_repeat_ngram_size=3,
+                )
+            inference_time = time.perf_counter() - t0
+
+            active_hyps = processor.batch_decode(predicted_ids, skip_special_tokens=True)
+            for i, hyp in zip(active_idx, active_hyps):
+                hypotheses[i] = hyp
+
+        per_sample_time = inference_time / max(1, len(active_idx))
 
         # creates a nice object / dict with the results, for storage / documentation
         for i, (ref, hyp, dur) in enumerate(zip(references, hypotheses, audio_durations)):
