@@ -18,6 +18,11 @@ import yaml
 from datasets import load_dataset
 from tqdm import tqdm
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
+from transformers import logging as hf_logging
+
+# silence the noisy (but harmless) transformers warnings around Whisper generation:
+# duplicate logits processors, max_length vs max_new_tokens, missing attention mask.
+hf_logging.set_verbosity_error()
 
 # transformers tries to pre-allocate the full model size in one CUDA chunk before loading
 # weights. On MIG instances with cudaMallocAsync this single big allocation OOMs even when
