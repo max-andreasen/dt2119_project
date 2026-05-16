@@ -40,14 +40,13 @@ def load_model(config):
     torch_dtype = torch.float16 if device in ("cuda", "mps") else torch.float32
 
     if device == "cuda":
-        # device_map="auto" avoids the .to(device) CUDA allocator bug present on MIG instances.
-        # max_memory prevents accelerate from CPU-offloading on MIG (which misreports available VRAM).
-        max_memory = getattr(config, "max_memory_cuda_gb", 18)
+        # device_map={"": "cuda:0"} forces all layers onto the GPU without memory estimation.
+        # device_map="auto" triggers accelerate's NVML-based memory check, which fails on MIG
+        # instances (misreports available VRAM), causing CPU offloading and a CUDA allocator crash.
         model = AutoModelForSpeechSeq2Seq.from_pretrained(
             config.model_id,
             dtype=torch_dtype,
-            device_map="auto",
-            max_memory={"cuda:0": f"{max_memory}GiB", "cpu": "64GiB"},
+            device_map={"": "cuda:0"},
         )
     else:
         model = AutoModelForSpeechSeq2Seq.from_pretrained(config.model_id, dtype=torch_dtype)
