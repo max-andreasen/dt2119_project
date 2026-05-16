@@ -194,6 +194,18 @@ def run_inference(config):
         if batch_idx % 10 == 0:
             logger.info("batch=%d samples_processed=%d", batch_idx, start + len(audio_arrays))
 
+        # periodic running WER/CER so we can spot if a run is going off the rails early.
+        # batch 5 and 10 give a quick sanity check; every 100 after that for ongoing tracking.
+        if batch_idx in (5, 10) or (batch_idx > 0 and batch_idx % 100 == 0):
+            refs_so_far = [str(r) for r in (row["reference"] for row in results)]
+            hyps_so_far = [str(h) for h in (row["hypothesis"] for row in results)]
+            running_wer = compute_wer(refs_so_far, hyps_so_far)
+            running_cer = compute_cer(refs_so_far, hyps_so_far)
+            logger.info(
+                "batch=%d running_WER=%.4f running_CER=%.4f n=%d",
+                batch_idx, running_wer, running_cer, len(results),
+            )
+
     # stores the results, paths and everything needed to navigate back to them
     # NOTE: transcriptions are saved first so metrics can be re-run later without re-running inference
     df = pd.DataFrame(results)
