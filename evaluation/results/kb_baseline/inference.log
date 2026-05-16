@@ -8,3 +8,7 @@
 2026-05-16 12:50:19,080 INFO run_name=kb_baseline model_type=kb
 2026-05-16 12:51:06,898 INFO device=mps
 2026-05-16 12:51:18,672 INFO Loaded 100 samples
+2026-05-16 13:28:25,622 INFO run_name=kb_baseline model_type=kb
+2026-05-16 13:29:20,035 INFO run_name=kb_baseline model_type=kb
+2026-05-16 13:30:21,244 INFO device=mps
+2026-05-16 13:30:25,988 INFO Loaded 100 samples
