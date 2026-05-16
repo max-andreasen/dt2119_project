@@ -2,6 +2,7 @@ torch
 torchaudio
 transformers
 datasets<3.0
+fsspec>=2023.1.0,<=2024.6.1
 soundfile
 librosa
 accelerate
