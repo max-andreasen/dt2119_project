@@ -19,6 +19,12 @@ from datasets import load_dataset
 from tqdm import tqdm
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
 
+# transformers tries to pre-allocate the full model size in one CUDA chunk before loading
+# weights. On MIG instances with cudaMallocAsync this single big allocation OOMs even when
+# layer-by-layer loading would fit. Disable the warmup (it is only a perf optimization).
+import transformers.modeling_utils as _modeling_utils
+_modeling_utils.caching_allocator_warmup = lambda *args, **kwargs: None
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from data.preprocess import preprocess_batch

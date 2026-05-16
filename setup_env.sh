@@ -6,6 +6,10 @@ REQUIREMENTS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/requirements.txt"
 
 source /opt/conda/etc/profile.d/conda.sh
 
+# Use the CUDA async allocator. The default PyTorch caching allocator queries NVML
+# for memory info which fails (INTERNAL ASSERT) on MIG-partitioned GPUs.
+export PYTORCH_CUDA_ALLOC_CONF=backend:cudaMallocAsync
+
 if conda env list | grep -q "$ENV_PATH"; then
     conda activate "$ENV_PATH"
     echo "Activated '$ENV_NAME'."
