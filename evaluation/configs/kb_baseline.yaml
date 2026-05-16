@@ -1,0 +1,12 @@
+model_type: kb
+model_id: KBLab/kb-whisper-large
+lora_adapter_path: null
+dataset: NbAiLab/NST
+dataset_config: no-both
+text_column: text
+batch_size: 4
+language: "no"
+task: transcribe
+max_samples: 100
+output_dir: results/
+run_name: kb_baseline
