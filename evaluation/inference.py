@@ -114,9 +114,11 @@ def run_inference(config):
     # loads the test set
     ds = load_dataset(config.dataset, config.dataset_config, split="test", trust_remote_code=True)
 
-    # we could use max_samples in the config, if inference is too slow to run with all samples
+    # we could use max_samples in the config, if inference is too slow to run with all samples.
+    # shuffle with a fixed seed before slicing so the subset is representative (NST is grouped
+    # by speaker) and so all model runs see the same samples — required for a fair comparison.
     if config.max_samples is not None:
-        ds = ds.select(range(config.max_samples))
+        ds = ds.shuffle(seed=getattr(config, "shuffle_seed", 42)).select(range(config.max_samples))
     logger.info("Loaded %d samples", len(ds))
 
     results = []
