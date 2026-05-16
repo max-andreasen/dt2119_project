@@ -6,10 +6,15 @@ to find the specific sample that stalls full-batch inference.
 import os
 import sys
 import time
+import warnings
 
 import torch
 from datasets import load_dataset
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
+from transformers import logging as hf_logging
+
+hf_logging.set_verbosity_error()
+warnings.filterwarnings("ignore", module="transformers.*")
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from data.preprocess import preprocess_batch
