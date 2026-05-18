@@ -1,0 +1,2 @@
+# Fine-tuned model — point at the saved LoRA adapter
+lora_path: training/trained/final

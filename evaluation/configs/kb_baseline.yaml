@@ -4,10 +4,10 @@ lora_adapter_path: null
 dataset: NbAiLab/NST
 dataset_config: no-both
 text_column: text
-batch_size: 4
+batch_size: 16
 language: "no"
 task: transcribe
-max_samples: 100
+max_samples: 10000
 max_memory_cuda_gb: 18
 output_dir: results/
 run_name: kb_baseline
