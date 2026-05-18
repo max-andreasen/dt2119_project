@@ -81,6 +81,7 @@ def load_model(config):
         model.to(device)
 
     # if the model is set to lora, load the adapter on top
+    # model_type "kb", "whisper", and "nb_whisper" all use the standard AutoModelForSpeechSeq2Seq path above
     if config.model_type == "lora":
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, config.lora_adapter_path)

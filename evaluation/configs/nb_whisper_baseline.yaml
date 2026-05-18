@@ -1,0 +1,13 @@
+model_type: nb_whisper
+model_id: NbAiLab/nb-whisper-large
+lora_adapter_path: null
+dataset: NbAiLab/NST
+dataset_config: no-both
+text_column: text
+batch_size: 16
+language: "no"
+task: transcribe
+max_samples: 10000
+max_memory_cuda_gb: 18
+output_dir: results/
+run_name: nb_whisper_baseline
