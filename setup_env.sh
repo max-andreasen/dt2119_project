@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "Run 'source setup_env.sh' — activation cannot propagate from a subshell."
+    exit 1
+fi
+
 ENV_NAME="dt2119"
 ENV_PATH="/home/jovyan/conda-envs/$ENV_NAME"
 REQUIREMENTS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/requirements.txt"
