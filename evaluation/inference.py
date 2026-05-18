@@ -160,7 +160,7 @@ def run_inference(config):
                     # max_new_tokens caps runaway hallucinations; no_repeat_ngram_size=3
                     # breaks the repetition loops Whisper falls into on repetitive audio.
                     predicted_ids = model.generate(
-                        input_features,
+                        input_features=input_features,
                         language=config.language,
                         task=config.task,
                         max_new_tokens=getattr(config, "max_new_tokens", 200),
