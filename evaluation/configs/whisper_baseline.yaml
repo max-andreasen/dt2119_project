@@ -2,12 +2,12 @@ model_type: whisper
 model_id: openai/whisper-large
 lora_adapter_path: null
 dataset: NbAiLab/NST
-dataset_config: no-both
+dataset_config: no-distant
 text_column: text
-batch_size: 8
+batch_size: 16
 language: "no"
 task: transcribe
-max_samples: null
+max_samples: 10000
 max_memory_cuda_gb: 18
 output_dir: results/
-run_name: whisper_baseline
+run_name: whisper_baseline_distant

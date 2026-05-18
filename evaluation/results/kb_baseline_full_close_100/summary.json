@@ -1,0 +1,25 @@
+{
+  "run_name": "kb_baseline_full_close_100",
+  "num_samples": 10000,
+  "wer": 0.6398722819120424,
+  "cer": 0.24137446119042524,
+  "mean_rtf": 0.027168952909221413,
+  "timed_out_batches": 4,
+  "timed_out_samples": 64,
+  "config": {
+    "model_type": "kb",
+    "model_id": "KBLab/kb-whisper-large",
+    "lora_adapter_path": null,
+    "dataset": "NbAiLab/NST",
+    "dataset_config": "no-close",
+    "text_column": "text",
+    "batch_size": 16,
+    "language": "no",
+    "task": "transcribe",
+    "max_samples": 10000,
+    "max_new_tokens": 200,
+    "max_memory_cuda_gb": 18,
+    "output_dir": "results/",
+    "run_name": "kb_baseline_full_close_100"
+  }
+}

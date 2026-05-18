@@ -1,4 +1,11 @@
 
 
 .venv
-training/trained
+training/trained__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.log
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.log
