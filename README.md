@@ -4,9 +4,20 @@
 To load the models weights and the dataset to cache, run: 
 ```bash
 pip install -r requirements.txt
-python main.py
+python main.py # optional
 ``` 
 Make sure to comment out the train split if just running inference. 
+
+### On the KTH server
+```bash
+source setup_env.sh
+python main.py # optional
+git lfs install
+git lfs pull
+```  
+setup_env.sh will automatically run the pip install for all requirements. 
+python main.py isn't strictly needed, as running e.g. infefence.py loads everything automatically. 
+git lfs pull will pull the large adapter weigths-file from the GH repo, in case that is not already present. 
 
 ## Repo structure
 This repo is mainly built to run inference, or evaluate the models. 
