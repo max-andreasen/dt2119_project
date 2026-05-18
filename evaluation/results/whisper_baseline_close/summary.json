@@ -1,0 +1,24 @@
+{
+  "run_name": "whisper_baseline_close",
+  "num_samples": 10000,
+  "wer": 0.3679586081525159,
+  "cer": 0.18718066297779545,
+  "mean_rtf": 0.025173561966999495,
+  "timed_out_batches": 0,
+  "timed_out_samples": 0,
+  "config": {
+    "model_type": "whisper",
+    "model_id": "openai/whisper-large",
+    "lora_adapter_path": null,
+    "dataset": "NbAiLab/NST",
+    "dataset_config": "no-close",
+    "text_column": "text",
+    "batch_size": 16,
+    "language": "no",
+    "task": "transcribe",
+    "max_samples": 10000,
+    "max_memory_cuda_gb": 18,
+    "output_dir": "results/",
+    "run_name": "whisper_baseline_close"
+  }
+}
