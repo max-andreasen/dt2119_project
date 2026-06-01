@@ -1,0 +1,15 @@
+# LoRA adapter (whisper-large-no-5k) on top of its true base, openai/whisper-large.
+# Close-mic split — compares against results/whisper_baseline_close/.
+model_type: lora
+model_id: openai/whisper-large
+lora_adapter_path: whisper-large-no-5k
+dataset: NbAiLab/NST
+dataset_config: no-close
+text_column: text
+batch_size: 16
+language: "no"
+task: transcribe
+max_samples: 10000
+max_memory_cuda_gb: 18
+output_dir: results/
+run_name: lora_whisper_large_no5k_close

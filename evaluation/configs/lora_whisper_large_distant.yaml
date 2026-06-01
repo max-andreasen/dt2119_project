@@ -1,0 +1,16 @@
+# LoRA adapter (whisper-large-no-5k) on top of its true base, openai/whisper-large.
+# Mirrors whisper_baseline.yaml so the fine-tuned result is directly comparable
+# to the untuned whisper baseline (same base, dataset config, and sample count).
+model_type: lora
+model_id: openai/whisper-large
+lora_adapter_path: whisper-large-no-5k
+dataset: NbAiLab/NST
+dataset_config: no-distant
+text_column: text
+batch_size: 16
+language: "no"
+task: transcribe
+max_samples: 10000
+max_memory_cuda_gb: 18
+output_dir: results/
+run_name: lora_whisper_large_no5k_distant
